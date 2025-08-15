@@ -1,23 +1,22 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Home, Plus, ArrowLeft, Save, ArrowRight } from "lucide-react";
+import { CSVUploader } from "@/components/CSVUploader";
+import { ConsolidateData } from "@/components/ConsolidateData";
+import { ErrorDisplay } from "@/components/ErrorDisplay";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    codigoImplantacao: "",
-    fidcNome: "",
-    fidcCnpj: "",
-    gestoraNome: "",
-    utilizaBlack10: false
+  const [uploadStates, setUploadStates] = useState({
+    step1: false,
+    step2: false,
+    step3: false
   });
+  const [errors, setErrors] = useState<string[]>([]);
 
-  const totalSteps = 10;
+  const totalSteps = 4;
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   const handleNext = () => {
@@ -32,11 +31,13 @@ const Index = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleUploadSuccess = (step: string) => {
+    setUploadStates(prev => ({ ...prev, [step]: true }));
+    setErrors([]);
+  };
+
+  const handleUploadError = (errorList: string[]) => {
+    setErrors(errorList);
   };
 
   return (
@@ -49,8 +50,8 @@ const Index = () => {
               <div className="w-4 h-4 bg-white rounded"></div>
             </div>
             <div>
-              <h1 className="text-xl font-semibold">Sistema de Configuração FIDC</h1>
-              <p className="text-blue-100 text-sm">Cadastro e configuração de fundos</p>
+            <h1 className="text-xl font-semibold">Sistema de Importação CSV</h1>
+              <p className="text-blue-100 text-sm">Upload e processamento de dados</p>
             </div>
           </div>
         </div>
@@ -72,11 +73,11 @@ const Index = () => {
           
           {/* Step Numbers */}
           <div className="flex items-center gap-2">
-            {[1, 2, 3].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <div
                 key={step}
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step === 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
+                  step <= currentStep ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
                 }`}
               >
                 {step}
@@ -90,7 +91,7 @@ const Index = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Dados Cadastrais</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Importação de Dados</h2>
                 <p className="text-gray-600">Etapa {currentStep} de {totalSteps}</p>
               </div>
               <div className="text-right">
@@ -101,85 +102,83 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Main Form Section */}
-        <Card>
-          <div className="bg-primary text-white p-6">
-            <h3 className="text-lg font-semibold">DADOS CADASTRAIS</h3>
-            <p className="text-blue-100">Informações básicas do FIDC</p>
-          </div>
-          
-          <CardContent className="p-8 space-y-8">
-            {/* Código de Implantação */}
-            <div className="space-y-2">
-              <Label htmlFor="codigo" className="text-sm font-medium text-gray-700">
-                Código de Implantação *
-              </Label>
-              <Input
-                id="codigo"
-                placeholder="Ex: blk2025Sab"
-                value={formData.codigoImplantacao}
-                onChange={(e) => handleInputChange('codigoImplantacao', e.target.value)}
-                className="max-w-md"
-              />
-              <p className="text-sm text-gray-500">
-                Este código identifica o ambiente de destino para envio da configuração
-              </p>
-            </div>
-
-            {/* FIDC Nome and CNPJ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="fidcNome" className="text-sm font-medium text-gray-700">
-                  FIDC - Nome *
-                </Label>
-                <Input
-                  id="fidcNome"
-                  placeholder="Nome do FIDC"
-                  value={formData.fidcNome}
-                  onChange={(e) => handleInputChange('fidcNome', e.target.value)}
-                />
+        {/* Main Content Section */}
+        <div className="space-y-6">
+          {currentStep === 1 && (
+            <Card>
+              <div className="bg-primary text-white p-6">
+                <h3 className="text-lg font-semibold">ETAPA 1 - DADOS PRINCIPAIS</h3>
+                <p className="text-blue-100">Upload do arquivo CSV com dados principais</p>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="fidcCnpj" className="text-sm font-medium text-gray-700">
-                  FIDC - CNPJ *
-                </Label>
-                <Input
-                  id="fidcCnpj"
-                  placeholder="00.000.000/0000-00"
-                  value={formData.fidcCnpj}
-                  onChange={(e) => handleInputChange('fidcCnpj', e.target.value)}
+              <CardContent className="p-8">
+                <CSVUploader
+                  title="Dados Principais"
+                  description="Faça upload do arquivo CSV com os dados principais para processamento"
+                  endpoint="upload-principais"
+                  onSuccess={() => handleUploadSuccess('step1')}
+                  onError={handleUploadError}
+                  completed={uploadStates.step1}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {currentStep === 2 && (
+            <Card>
+              <div className="bg-primary text-white p-6">
+                <h3 className="text-lg font-semibold">ETAPA 2 - DADOS SECUNDÁRIOS</h3>
+                <p className="text-blue-100">Upload do arquivo CSV com dados secundários</p>
               </div>
-            </div>
+              <CardContent className="p-8">
+                <CSVUploader
+                  title="Dados Secundários"
+                  description="Faça upload do arquivo CSV com os dados secundários complementares"
+                  endpoint="upload-secundarios"
+                  onSuccess={() => handleUploadSuccess('step2')}
+                  onError={handleUploadError}
+                  completed={uploadStates.step2}
+                />
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Gestora Nome */}
-            <div className="space-y-2">
-              <Label htmlFor="gestoraNome" className="text-sm font-medium text-gray-700">
-                Gestora - Nome *
-              </Label>
-              <Input
-                id="gestoraNome"
-                placeholder="Nome dos gestores"
-                value={formData.gestoraNome}
-                onChange={(e) => handleInputChange('gestoraNome', e.target.value)}
-                className="max-w-md"
-              />
-            </div>
+          {currentStep === 3 && (
+            <Card>
+              <div className="bg-primary text-white p-6">
+                <h3 className="text-lg font-semibold">ETAPA 3 - DADOS ADICIONAIS</h3>
+                <p className="text-blue-100">Upload do arquivo CSV com dados adicionais</p>
+              </div>
+              <CardContent className="p-8">
+                <CSVUploader
+                  title="Dados Adicionais"
+                  description="Faça upload do arquivo CSV com os dados adicionais para complementar o processamento"
+                  endpoint="upload-adicionais"
+                  onSuccess={() => handleUploadSuccess('step3')}
+                  onError={handleUploadError}
+                  completed={uploadStates.step3}
+                />
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Checkbox */}
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="utilizaBlack10"
-                checked={formData.utilizaBlack10}
-                onCheckedChange={(checked) => handleInputChange('utilizaBlack10', checked as boolean)}
-              />
-              <Label htmlFor="utilizaBlack10" className="text-sm font-medium text-gray-700">
-                A Gestora do FIDC Utiliza a Black10?
-              </Label>
-            </div>
-          </CardContent>
-        </Card>
+          {currentStep === 4 && (
+            <Card>
+              <div className="bg-primary text-white p-6">
+                <h3 className="text-lg font-semibold">ETAPA 4 - CONSOLIDAÇÃO</h3>
+                <p className="text-blue-100">Consolidação e download dos dados processados</p>
+              </div>
+              <CardContent className="p-8">
+                <ConsolidateData 
+                  disabled={!uploadStates.step1 || !uploadStates.step2 || !uploadStates.step3}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {errors.length > 0 && (
+            <ErrorDisplay errors={errors} onDismiss={() => setErrors([])} />
+          )}
+        </div>
 
         {/* Navigation Buttons */}
         <div className="flex items-center justify-between mt-8">
@@ -199,7 +198,11 @@ const Index = () => {
               Salvar Progresso
             </Button>
             
-            <Button onClick={handleNext} className="flex items-center gap-2">
+            <Button 
+              onClick={handleNext} 
+              disabled={currentStep === totalSteps}
+              className="flex items-center gap-2"
+            >
               Próximo
               <ArrowRight className="w-4 h-4" />
             </Button>
