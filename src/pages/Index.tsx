@@ -55,20 +55,21 @@ const Index = () => {
   const allStepsCompleted = completedSteps.size === csvSteps.length;
 
   return (
-    <div className="container mx-auto py-12 px-4">
-      <div className="max-w-6xl mx-auto space-y-12">
-        {/* Page Header */}
-        <div className="text-center space-y-6 animate-fade-in">
-          <div className="relative">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              Processamento de Dados
-            </h1>
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-glow/20 blur-lg -z-10 rounded-lg"></div>
+    <div className="min-h-screen">
+      <div className="container mx-auto py-12 px-4">
+        <div className="max-w-6xl mx-auto space-y-12">
+          {/* Header */}
+          <div className="text-center space-y-6 animate-fade-in">
+            <div className="relative">
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                Dashboard CSV
+              </h1>
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-glow/20 blur-lg -z-10 rounded-lg"></div>
+            </div>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Carregue seus arquivos CSV seguindo a sequência obrigatória para processamento inteligente
+            </p>
           </div>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Carregue seus arquivos CSV seguindo a sequência obrigatória para processamento inteligente
-          </p>
-        </div>
 
           {/* Progress Steps */}
           <ProgressSteps steps={steps} />
