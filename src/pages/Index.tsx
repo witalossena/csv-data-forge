@@ -55,14 +55,19 @@ const Index = () => {
   const allStepsCompleted = completedSteps.size === csvSteps.length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto py-12 px-4">
+        <div className="max-w-6xl mx-auto space-y-12">
           {/* Header */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold">Dashboard de Upload CSV</h1>
-            <p className="text-xl text-muted-foreground">
-              Carregue seus arquivos CSV seguindo a sequência obrigatória
+          <div className="text-center space-y-6 animate-fade-in">
+            <div className="relative">
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                Dashboard CSV
+              </h1>
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-glow/20 blur-lg -z-10 rounded-lg"></div>
+            </div>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Carregue seus arquivos CSV seguindo a sequência obrigatória para processamento inteligente
             </p>
           </div>
 
@@ -73,18 +78,19 @@ const Index = () => {
           <ErrorDisplay errors={errors} onDismiss={() => setErrors([])} />
 
           {/* CSV Uploaders */}
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-8 lg:grid-cols-3 animate-fade-in">
             {csvSteps.map((step, index) => (
-              <CSVUploader
-                key={step.id}
-                title={step.title}
-                description={step.description}
-                endpoint={step.endpoint}
-                onSuccess={(data) => handleStepSuccess(step.id, data)}
-                onError={handleStepError}
-                disabled={index > currentStep}
-                completed={completedSteps.has(step.id)}
-              />
+              <div key={step.id} className="animate-scale-in" style={{ animationDelay: `${index * 150}ms` }}>
+                <CSVUploader
+                  title={step.title}
+                  description={step.description}
+                  endpoint={step.endpoint}
+                  onSuccess={(data) => handleStepSuccess(step.id, data)}
+                  onError={handleStepError}
+                  disabled={index > currentStep}
+                  completed={completedSteps.has(step.id)}
+                />
+              </div>
             ))}
           </div>
 

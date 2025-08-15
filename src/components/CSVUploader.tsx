@@ -88,23 +88,40 @@ export function CSVUploader({
 
   return (
     <Card className={cn(
-      "transition-all duration-300",
-      disabled && "opacity-50",
-      completed && "border-success bg-success/5"
+      "glass-effect transition-all duration-500 hover:scale-105 hover:shadow-lg group relative overflow-hidden",
+      disabled && "opacity-50 hover:scale-100",
+      completed && "border-success shadow-success animate-pulse-glow"
     )}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      {completed && (
+        <div className="absolute inset-0 bg-gradient-success opacity-10 pointer-events-none"></div>
+      )}
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center gap-3 text-lg">
           {completed ? (
-            <CheckCircle className="h-5 w-5 text-success" />
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-success text-white">
+              <CheckCircle className="h-5 w-5" />
+            </div>
           ) : (
-            <FileText className="h-5 w-5" />
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+              <FileText className="h-5 w-5" />
+            </div>
           )}
-          {title}
+          <span className={cn(
+            "transition-colors",
+            completed && "text-success"
+          )}>
+            {title}
+          </span>
         </CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription className="text-base leading-relaxed">
+          {description}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="border-2 border-dashed rounded-lg p-6 text-center">
+      <CardContent className="space-y-6">
+        <div className={cn(
+          "border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 hover:border-primary/50 hover:bg-primary/5",
+          file && "border-primary/30 bg-primary/5"
+        )}>
           <input
             ref={fileInputRef}
             type="file"
@@ -115,19 +132,34 @@ export function CSVUploader({
           />
           
           {file ? (
-            <div className="space-y-2">
-              <FileText className="h-8 w-8 mx-auto text-primary" />
-              <p className="text-sm font-medium">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {(file.size / 1024).toFixed(1)} KB
-              </p>
+            <div className="space-y-4">
+              <div className="relative">
+                <FileText className="h-12 w-12 mx-auto text-primary" />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full flex items-center justify-center">
+                  <CheckCircle className="h-3 w-3 text-white" />
+                </div>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">{file.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {(file.size / 1024).toFixed(1)} KB • Arquivo selecionado
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Clique para selecionar um arquivo CSV
-              </p>
+            <div className="space-y-4">
+              <div className="relative">
+                <Upload className="h-12 w-12 mx-auto text-muted-foreground transition-colors group-hover:text-primary" />
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-glow/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">
+                  Arraste e solte ou clique para selecionar
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Arquivos .csv ou .txt suportados
+                </p>
+              </div>
             </div>
           )}
           
@@ -135,9 +167,9 @@ export function CSVUploader({
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || completed}
-            className="mt-2"
+            className="mt-6 px-8 py-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
           >
-            Selecionar Arquivo
+            {file ? "Alterar Arquivo" : "Selecionar Arquivo"}
           </Button>
         </div>
 
@@ -145,16 +177,23 @@ export function CSVUploader({
           <Button
             onClick={handleUpload}
             disabled={disabled || isUploading}
-            className="w-full"
+            className="w-full py-3 text-lg font-semibold bg-gradient-primary hover:shadow-primary transition-all duration-300"
           >
-            {isUploading ? "Enviando..." : "Processar CSV"}
+            {isUploading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Processando...
+              </div>
+            ) : (
+              "Processar CSV"
+            )}
           </Button>
         )}
 
         {completed && (
-          <div className="flex items-center gap-2 text-success text-sm">
-            <CheckCircle className="h-4 w-4" />
-            Arquivo processado com sucesso
+          <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-gradient-success text-white">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-semibold">Arquivo processado com sucesso!</span>
           </div>
         )}
       </CardContent>

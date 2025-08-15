@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { BarChart, Download, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface ConsolidateDataProps {
   disabled: boolean;
@@ -61,51 +62,75 @@ export function ConsolidateData({ disabled }: ConsolidateDataProps) {
   };
 
   return (
-    <Card className={disabled ? "opacity-50" : ""}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart className="h-5 w-5" />
+    <Card className={cn(
+      "glass-effect transition-all duration-500 hover:scale-[1.02] relative overflow-hidden",
+      disabled ? "opacity-50" : "hover:shadow-xl",
+      !disabled && "animate-fade-in"
+    )}>
+      {!disabled && (
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary-glow/5 pointer-events-none"></div>
+      )}
+      <CardHeader className="text-center pb-6">
+        <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+          <div className={cn(
+            "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300",
+            disabled 
+              ? "bg-muted text-muted-foreground" 
+              : "bg-gradient-primary text-white shadow-primary"
+          )}>
+            <BarChart className="h-6 w-6" />
+          </div>
           Consolidar Dados
         </CardTitle>
-        <CardDescription>
-          Processa e consolida todos os dados enviados nos CSVs anteriores
+        <CardDescription className="text-lg leading-relaxed max-w-md mx-auto">
+          Processa e consolida todos os dados enviados nos CSVs anteriores para análise final
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <Button
           onClick={handleConsolidate}
           disabled={disabled || isLoading}
-          className="w-full"
+          className={cn(
+            "w-full py-4 text-lg font-semibold transition-all duration-300",
+            disabled 
+              ? "opacity-50" 
+              : "bg-gradient-primary hover:shadow-primary hover:scale-105"
+          )}
         >
           {isLoading ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Consolidando...
-            </>
+            <div className="flex items-center gap-3">
+              <RefreshCw className="h-5 w-5 animate-spin" />
+              <span>Consolidando dados...</span>
+            </div>
           ) : (
-            <>
-              <BarChart className="h-4 w-4 mr-2" />
-              Consolidar Dados
-            </>
+            <div className="flex items-center gap-3">
+              <BarChart className="h-5 w-5" />
+              <span>Iniciar Consolidação</span>
+            </div>
           )}
         </Button>
 
         {consolidatedData && (
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">Dados Consolidados:</h4>
-              <pre className="text-sm text-muted-foreground overflow-auto max-h-40">
-                {JSON.stringify(consolidatedData, null, 2)}
-              </pre>
+          <div className="space-y-6 animate-fade-in">
+            <div className="p-6 glass-effect rounded-xl border border-success/30">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-3 h-3 bg-gradient-success rounded-full animate-pulse"></div>
+                <h4 className="font-semibold text-success text-lg">Dados Consolidados</h4>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-4 max-h-48 overflow-auto">
+                <pre className="text-sm text-foreground leading-relaxed">
+                  {JSON.stringify(consolidatedData, null, 2)}
+                </pre>
+              </div>
             </div>
             
             <Button
               variant="outline"
               onClick={handleDownload}
-              className="w-full"
+              className="w-full py-3 text-lg border-success/30 hover:bg-gradient-success hover:text-white hover:border-success transition-all duration-300"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Baixar Dados
+              <Download className="h-5 w-5 mr-2" />
+              Baixar Dados Consolidados
             </Button>
           </div>
         )}
