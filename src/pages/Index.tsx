@@ -1,101 +1,209 @@
 import { useState } from "react";
-import { CSVUploader } from "@/components/CSVUploader";
-import { ProgressSteps } from "@/components/ProgressSteps";
-import { ErrorDisplay } from "@/components/ErrorDisplay";
-import { ConsolidateData } from "@/components/ConsolidateData";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Home, Plus, ArrowLeft, Save, ArrowRight } from "lucide-react";
 
 const Index = () => {
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
-  const [currentStep, setCurrentStep] = useState(0);
-  const [errors, setErrors] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState({
+    codigoImplantacao: "",
+    fidcNome: "",
+    fidcCnpj: "",
+    gestoraNome: "",
+    utilizaBlack10: false
+  });
 
-  const csvSteps = [
-    {
-      id: "pessoa-juridica",
-      title: "Pessoa Jurídica",
-      description: "Upload do CSV de pessoas jurídicas",
-      endpoint: "PessoaJuridica-csv",
-    },
-    {
-      id: "operacoes",
-      title: "Operações",
-      description: "Upload do CSV de operações",
-      endpoint: "Operacoes-csv",
-    },
-    {
-      id: "aditivo-documentos",
-      title: "Aditivo Documentos",
-      description: "Upload do CSV de aditivos e documentos",
-      endpoint: "Aditivodocumentos-csv",
-    },
-  ];
+  const totalSteps = 10;
+  const progressPercentage = (currentStep / totalSteps) * 100;
 
-  const steps = csvSteps.map((step, index) => ({
-    ...step,
-    completed: completedSteps.has(step.id),
-    current: index === currentStep,
-    locked: index > currentStep,
-  }));
-
-  const handleStepSuccess = (stepId: string, data: any) => {
-    setCompletedSteps(prev => new Set([...prev, stepId]));
-    setErrors([]);
-    
-    // Move to next step if not at the end
-    const stepIndex = csvSteps.findIndex(step => step.id === stepId);
-    if (stepIndex < csvSteps.length - 1) {
-      setCurrentStep(stepIndex + 1);
+  const handleNext = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
-  const handleStepError = (errors: string[]) => {
-    setErrors(errors);
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
-  const allStepsCompleted = completedSteps.size === csvSteps.length;
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto py-12 px-4">
-        <div className="max-w-6xl mx-auto space-y-12">
-          {/* Header */}
-          <div className="text-center space-y-6 animate-fade-in">
-            <div className="relative">
-              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-                Dashboard CSV
-              </h1>
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary-glow/20 blur-lg -z-10 rounded-lg"></div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-primary text-white">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded"></div>
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Carregue seus arquivos CSV seguindo a sequência obrigatória para processamento inteligente
-            </p>
+            <div>
+              <h1 className="text-xl font-semibold">Sistema de Configuração FIDC</h1>
+              <p className="text-blue-100 text-sm">Cadastro e configuração de fundos</p>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* Progress Steps */}
-          <ProgressSteps steps={steps} />
-
-          {/* Error Display */}
-          <ErrorDisplay errors={errors} onDismiss={() => setErrors([])} />
-
-          {/* CSV Uploaders */}
-          <div className="grid gap-8 lg:grid-cols-3 animate-fade-in">
-            {csvSteps.map((step, index) => (
-              <div key={step.id} className="animate-scale-in" style={{ animationDelay: `${index * 150}ms` }}>
-                <CSVUploader
-                  title={step.title}
-                  description={step.description}
-                  endpoint={step.endpoint}
-                  onSuccess={(data) => handleStepSuccess(step.id, data)}
-                  onError={handleStepError}
-                  disabled={index > currentStep}
-                  completed={completedSteps.has(step.id)}
-                />
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        {/* Navigation */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              Voltar ao Início
+            </Button>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Começar Novo
+            </Button>
+          </div>
+          
+          {/* Step Numbers */}
+          <div className="flex items-center gap-2">
+            {[1, 2, 3].map((step) => (
+              <div
+                key={step}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step === 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {step}
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Consolidate Data */}
-          <ConsolidateData disabled={!allStepsCompleted} />
+        {/* Progress Section */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Dados Cadastrais</h2>
+                <p className="text-gray-600">Etapa {currentStep} de {totalSteps}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-600">{Math.round(progressPercentage)}% concluído</p>
+              </div>
+            </div>
+            <Progress value={progressPercentage} className="h-2" />
+          </CardContent>
+        </Card>
+
+        {/* Main Form Section */}
+        <Card>
+          <div className="bg-primary text-white p-6">
+            <h3 className="text-lg font-semibold">DADOS CADASTRAIS</h3>
+            <p className="text-blue-100">Informações básicas do FIDC</p>
+          </div>
+          
+          <CardContent className="p-8 space-y-8">
+            {/* Código de Implantação */}
+            <div className="space-y-2">
+              <Label htmlFor="codigo" className="text-sm font-medium text-gray-700">
+                Código de Implantação *
+              </Label>
+              <Input
+                id="codigo"
+                placeholder="Ex: blk2025Sab"
+                value={formData.codigoImplantacao}
+                onChange={(e) => handleInputChange('codigoImplantacao', e.target.value)}
+                className="max-w-md"
+              />
+              <p className="text-sm text-gray-500">
+                Este código identifica o ambiente de destino para envio da configuração
+              </p>
+            </div>
+
+            {/* FIDC Nome and CNPJ */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="fidcNome" className="text-sm font-medium text-gray-700">
+                  FIDC - Nome *
+                </Label>
+                <Input
+                  id="fidcNome"
+                  placeholder="Nome do FIDC"
+                  value={formData.fidcNome}
+                  onChange={(e) => handleInputChange('fidcNome', e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="fidcCnpj" className="text-sm font-medium text-gray-700">
+                  FIDC - CNPJ *
+                </Label>
+                <Input
+                  id="fidcCnpj"
+                  placeholder="00.000.000/0000-00"
+                  value={formData.fidcCnpj}
+                  onChange={(e) => handleInputChange('fidcCnpj', e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Gestora Nome */}
+            <div className="space-y-2">
+              <Label htmlFor="gestoraNome" className="text-sm font-medium text-gray-700">
+                Gestora - Nome *
+              </Label>
+              <Input
+                id="gestoraNome"
+                placeholder="Nome dos gestores"
+                value={formData.gestoraNome}
+                onChange={(e) => handleInputChange('gestoraNome', e.target.value)}
+                className="max-w-md"
+              />
+            </div>
+
+            {/* Checkbox */}
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="utilizaBlack10"
+                checked={formData.utilizaBlack10}
+                onCheckedChange={(checked) => handleInputChange('utilizaBlack10', checked as boolean)}
+              />
+              <Label htmlFor="utilizaBlack10" className="text-sm font-medium text-gray-700">
+                A Gestora do FIDC Utiliza a Black10?
+              </Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between mt-8">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Anterior
+          </Button>
+          
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Save className="w-4 h-4" />
+              Salvar Progresso
+            </Button>
+            
+            <Button onClick={handleNext} className="flex items-center gap-2">
+              Próximo
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
