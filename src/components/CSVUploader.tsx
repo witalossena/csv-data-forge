@@ -49,6 +49,11 @@ export function CSVUploader({
     setIsUploading(true);
 
     try {
+      // Read CSV columns before uploading
+      const csvText = await file.text();
+      const lines = csvText.split('\n');
+      const headers = lines[0] ? lines[0].split(',').map(col => col.trim().replace(/"/g, '')) : [];
+
       const formData = new FormData();
       formData.append('file', file);
 
@@ -74,7 +79,12 @@ export function CSVUploader({
       }
 
       if (response.ok) {
-        onSuccess(result);
+        // Include CSV columns in the success callback
+        const successData = {
+          ...result,
+          columns: headers
+        };
+        onSuccess(successData);
         toast({
           title: "Sucesso",
           description: "Arquivo processado com sucesso!",

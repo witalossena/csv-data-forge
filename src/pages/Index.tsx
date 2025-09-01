@@ -6,6 +6,7 @@ import { Home, Plus, ArrowLeft, Save, ArrowRight } from "lucide-react";
 import { CSVUploader } from "@/components/CSVUploader";
 import { ConsolidateData } from "@/components/ConsolidateData";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
+import { ColumnMapper } from "@/components/ColumnMapper";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -15,6 +16,9 @@ const Index = () => {
     step3: false
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const [showColumnMapper, setShowColumnMapper] = useState(false);
+  const [csvColumns, setCsvColumns] = useState<string[]>([]);
+  const [currentMappingStep, setCurrentMappingStep] = useState<string>('');
 
   const totalSteps = 4;
   const progressPercentage = (currentStep / totalSteps) * 100;
@@ -31,9 +35,40 @@ const Index = () => {
     }
   };
 
-  const handleUploadSuccess = (step: string) => {
-    setUploadStates(prev => ({ ...prev, [step]: true }));
+  const handleUploadSuccess = (step: string, data?: any) => {
+    // If data contains CSV columns, show the column mapper
+    if (data && data.columns) {
+      setCsvColumns(data.columns);
+      setCurrentMappingStep(step);
+      setShowColumnMapper(true);
+    } else {
+      // Mark step as complete if no column mapping needed
+      setUploadStates(prev => ({ ...prev, [step]: true }));
+    }
     setErrors([]);
+  };
+
+  const handleMappingComplete = (mapping: any[]) => {
+    // TODO: Send mapping to backend or store it
+    console.log('Column mapping:', mapping);
+    
+    // Mark the current step as completed
+    setUploadStates(prev => ({ ...prev, [currentMappingStep]: true }));
+    
+    // Hide column mapper
+    setShowColumnMapper(false);
+    setCsvColumns([]);
+    setCurrentMappingStep('');
+  };
+
+  const handleMappingCancel = () => {
+    // Reset upload state for current step
+    setUploadStates(prev => ({ ...prev, [currentMappingStep]: false }));
+    
+    // Hide column mapper
+    setShowColumnMapper(false);
+    setCsvColumns([]);
+    setCurrentMappingStep('');
   };
 
   const handleUploadError = (errorList: string[]) => {
@@ -115,7 +150,7 @@ const Index = () => {
                   title="Pessoas Jurídicas / Cedentes"
                   description="Faça upload do arquivo CSV contendo os dados das pessoas jurídicas ou cedentes"
                   endpoint="https://localhost:7149/api/v1/importar/PessoaJuridica-csv"
-                  onSuccess={() => handleUploadSuccess('step1')}
+                  onSuccess={(data) => handleUploadSuccess('step1', data)}
                   onError={handleUploadError}
                   completed={uploadStates.step1}
                 />
@@ -173,6 +208,14 @@ const Index = () => {
                 />
               </CardContent>
             </Card>
+          )}
+
+          {showColumnMapper && (
+            <ColumnMapper
+              csvColumns={csvColumns}
+              onMappingComplete={handleMappingComplete}
+              onCancel={handleMappingCancel}
+            />
           )}
 
           {errors.length > 0 && (
