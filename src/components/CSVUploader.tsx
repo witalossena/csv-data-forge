@@ -197,7 +197,7 @@ export function CSVUploader({
           <Button
             onClick={handleUpload}
             disabled={disabled || isUploading}
-            className="w-full py-3 text-lg font-semibold bg-gradient-primary hover:shadow-primary transition-all duration-300"
+            className="w-full py-3 text-lg font-semibold bg-gradient-primary hover:shadow-primary transition-all duration-300 disabled:opacity-100 disabled:bg-gradient-primary disabled:cursor-not-allowed"
           >
             {isUploading ? (
               <div className="flex items-center gap-2">
