@@ -52,12 +52,26 @@ export function CSVUploader({
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch(`/api/${endpoint}`, {
+      // Support absolute URLs (http/https) or relative api paths
+      const url = (() => {
+        if (/^https?:\/\//i.test(endpoint)) return endpoint;
+        if (endpoint.startsWith("/")) return endpoint; 
+        return `/api/${endpoint}`;
+      })();
+
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });
 
-      const result = await response.json();
+      // Try to parse JSON; fallback to text; allow empty (204/no content)
+      const rawText = await response.text();
+      let result: any = undefined;
+      try {
+        result = rawText ? JSON.parse(rawText) : undefined;
+      } catch {
+        result = rawText;
+      }
 
       if (response.ok) {
         onSuccess(result);
@@ -66,7 +80,13 @@ export function CSVUploader({
           description: "Arquivo processado com sucesso!",
         });
       } else {
-        onError(Array.isArray(result) ? result : [result.message || "Erro desconhecido"]);
+        const message = Array.isArray(result)
+          ? result
+          : [
+              (result && (result.message || result.error || String(result))) ||
+                `Erro ${response.status}`,
+            ];
+        onError(message);
         toast({
           title: "Erro no processamento",
           description: "Verifique os erros reportados",

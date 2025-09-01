@@ -114,7 +114,7 @@ const Index = () => {
                 <CSVUploader
                   title="Pessoas Jurídicas / Cedentes"
                   description="Faça upload do arquivo CSV contendo os dados das pessoas jurídicas ou cedentes"
-                  endpoint="upload-juridicas"
+                  endpoint="https://localhost:7149/api/v1/importar/PessoaJuridica-csv"
                   onSuccess={() => handleUploadSuccess('step1')}
                   onError={handleUploadError}
                   completed={uploadStates.step1}
