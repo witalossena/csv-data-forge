@@ -107,14 +107,14 @@ const Index = () => {
           {currentStep === 1 && (
             <Card>
               <div className="bg-primary text-white p-6">
-                <h3 className="text-lg font-semibold">ETAPA 1 - DADOS PRINCIPAIS</h3>
-                <p className="text-blue-100">Upload do arquivo CSV com dados principais</p>
+                <h3 className="text-lg font-semibold">ETAPA 1 - PESSOAS JURÍDICAS / CEDENTES</h3>
+                <p className="text-blue-100">Upload do arquivo CSV com dados das pessoas jurídicas ou cedentes</p>
               </div>
               <CardContent className="p-8">
                 <CSVUploader
-                  title="Dados Principais"
-                  description="Faça upload do arquivo CSV com os dados principais para processamento"
-                  endpoint="upload-principais"
+                  title="Pessoas Jurídicas / Cedentes"
+                  description="Faça upload do arquivo CSV contendo os dados das pessoas jurídicas ou cedentes"
+                  endpoint="upload-juridicas"
                   onSuccess={() => handleUploadSuccess('step1')}
                   onError={handleUploadError}
                   completed={uploadStates.step1}
